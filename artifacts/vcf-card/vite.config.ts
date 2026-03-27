@@ -2,30 +2,31 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 // PORT and BASE_PATH are set by Replit in development.
 // On Vercel (or any other host), sensible defaults are used automatically.
 const port = Number(process.env.PORT ?? "3000");
 const basePath = process.env.BASE_PATH ?? "/";
+const isReplit = !!process.env.REPL_ID;
+const isDev = process.env.NODE_ENV !== "production";
 
 export default defineConfig({
   base: basePath,
   plugins: [
     react(),
     tailwindcss(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
+    // Replit-only plugins — skipped during Vercel builds
+    ...(isReplit
       ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer({
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
+          await import("@replit/vite-plugin-runtime-error-modal").then((m) => m.default()),
+          ...(isDev
+            ? [
+                await import("@replit/vite-plugin-cartographer").then((m) =>
+                  m.cartographer({ root: path.resolve(import.meta.dirname, "..") }),
+                ),
+                await import("@replit/vite-plugin-dev-banner").then((m) => m.devBanner()),
+              ]
+            : []),
         ]
       : []),
   ],
@@ -38,7 +39,8 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    // Output to the project root's dist/ folder so Vercel can find it easily
+    outDir: path.resolve(import.meta.dirname, "../../dist"),
     emptyOutDir: true,
   },
   server: {

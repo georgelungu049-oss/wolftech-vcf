@@ -14,3 +14,37 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Save a visitor's contact info to the database
+ * @summary Submit a contact
+ */
+export const submitContactBodyFullNameMax = 100;
+
+export const submitContactBodyPhoneMin = 5;
+export const submitContactBodyPhoneMax = 30;
+
+export const submitContactBodyEmailMax = 200;
+
+export const submitContactBodyOrganizationMax = 100;
+
+export const SubmitContactBody = zod.object({
+  fullName: zod.string().min(1).max(submitContactBodyFullNameMax),
+  phone: zod
+    .string()
+    .min(submitContactBodyPhoneMin)
+    .max(submitContactBodyPhoneMax),
+  email: zod.string().max(submitContactBodyEmailMax).nullish(),
+  organization: zod.string().max(submitContactBodyOrganizationMax).nullish(),
+});
+
+/**
+ * Returns the current count, target, and whether the target has been reached
+ * @summary Get collection progress
+ */
+export const GetContactStatsResponse = zod.object({
+  count: zod.number(),
+  target: zod.number(),
+  percentage: zod.number(),
+  targetReached: zod.boolean(),
+});

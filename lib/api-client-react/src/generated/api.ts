@@ -5,18 +5,27 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  ContactStats,
+  ErrorResponse,
+  HealthStatus,
+  SubmitContactRequest,
+  SubmitContactResponse,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -92,6 +101,243 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Save a visitor's contact info to the database
+ * @summary Submit a contact
+ */
+export const getSubmitContactUrl = () => {
+  return `/api/contacts`;
+};
+
+export const submitContact = async (
+  submitContactRequest: SubmitContactRequest,
+  options?: RequestInit,
+): Promise<SubmitContactResponse> => {
+  return customFetch<SubmitContactResponse>(getSubmitContactUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(submitContactRequest),
+  });
+};
+
+export const getSubmitContactMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitContact>>,
+    TError,
+    { data: BodyType<SubmitContactRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitContact>>,
+  TError,
+  { data: BodyType<SubmitContactRequest> },
+  TContext
+> => {
+  const mutationKey = ["submitContact"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitContact>>,
+    { data: BodyType<SubmitContactRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return submitContact(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SubmitContactMutationResult = NonNullable<
+  Awaited<ReturnType<typeof submitContact>>
+>;
+export type SubmitContactMutationBody = BodyType<SubmitContactRequest>;
+export type SubmitContactMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Submit a contact
+ */
+export const useSubmitContact = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof submitContact>>,
+    TError,
+    { data: BodyType<SubmitContactRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof submitContact>>,
+  TError,
+  { data: BodyType<SubmitContactRequest> },
+  TContext
+> => {
+  return useMutation(getSubmitContactMutationOptions(options));
+};
+
+/**
+ * Returns the current count, target, and whether the target has been reached
+ * @summary Get collection progress
+ */
+export const getGetContactStatsUrl = () => {
+  return `/api/contacts/stats`;
+};
+
+export const getContactStats = async (
+  options?: RequestInit,
+): Promise<ContactStats> => {
+  return customFetch<ContactStats>(getGetContactStatsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetContactStatsQueryKey = () => {
+  return [`/api/contacts/stats`] as const;
+};
+
+export const getGetContactStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getContactStats>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getContactStats>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetContactStatsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getContactStats>>> = ({
+    signal,
+  }) => getContactStats({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getContactStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetContactStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getContactStats>>
+>;
+export type GetContactStatsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get collection progress
+ */
+
+export function useGetContactStats<
+  TData = Awaited<ReturnType<typeof getContactStats>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof getContactStats>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetContactStatsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Downloads a VCF file of all collected contacts (only available when target is reached)
+ * @summary Download VCF file
+ */
+export const getDownloadVcfUrl = () => {
+  return `/api/contacts/download`;
+};
+
+export const downloadVcf = async (options?: RequestInit): Promise<string> => {
+  return customFetch<string>(getDownloadVcfUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getDownloadVcfQueryKey = () => {
+  return [`/api/contacts/download`] as const;
+};
+
+export const getDownloadVcfQueryOptions = <
+  TData = Awaited<ReturnType<typeof downloadVcf>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof downloadVcf>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getDownloadVcfQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof downloadVcf>>> = ({
+    signal,
+  }) => downloadVcf({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof downloadVcf>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type DownloadVcfQueryResult = NonNullable<
+  Awaited<ReturnType<typeof downloadVcf>>
+>;
+export type DownloadVcfQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Download VCF file
+ */
+
+export function useDownloadVcf<
+  TData = Awaited<ReturnType<typeof downloadVcf>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof downloadVcf>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getDownloadVcfQueryOptions(options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

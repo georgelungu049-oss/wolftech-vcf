@@ -5,9 +5,6 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface SubmitContactRequest {
   /**
@@ -24,21 +21,4 @@ export interface SubmitContactRequest {
   email?: string | null;
   /** @maxLength 100 */
   organization?: string | null;
-}
-
-export interface ContactStats {
-  count: number;
-  target: number;
-  percentage: number;
-  targetReached: boolean;
-}
-
-export interface SubmitContactResponse {
-  id: number;
-  message: string;
-  stats: ContactStats;
-}
-
-export interface ErrorResponse {
-  error: string;
 }

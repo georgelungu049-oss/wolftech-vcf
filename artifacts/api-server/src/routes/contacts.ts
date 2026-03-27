@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { contactsTable, settingsTable } from "@workspace/db/schema";
 import { SubmitContactBody } from "@workspace/api-zod";
 import { eq, count } from "drizzle-orm";
-import { config } from "../config";
+import { config } from "../../../../config";
 
 const router: IRouter = Router();
 

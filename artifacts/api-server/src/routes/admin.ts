@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { contactsTable, settingsTable } from "@workspace/db/schema";
 import { eq, count, desc } from "drizzle-orm";
-import { config } from "../config";
+import { config } from "../../../../config";
 
 const router: IRouter = Router();
 

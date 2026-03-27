@@ -16,8 +16,6 @@ async function fetchStats(): Promise<Stats> {
 async function submitContact(data: {
   fullName: string;
   phone: string;
-  email?: string;
-  organization?: string;
 }): Promise<{ id: number; message: string; stats: Stats }> {
   const res = await fetch("/api/contacts", {
     method: "POST",
@@ -33,134 +31,100 @@ function downloadVcf() {
   window.open("/api/contacts/download", "_blank");
 }
 
+const mono = "'JetBrains Mono', monospace";
+const orb = "'Orbitron', sans-serif";
+
+const green = "hsl(120 100% 50%)";
+const greenDim = "hsl(120 50% 40%)";
+const greenMuted = "hsl(120 20% 30%)";
+const greenFaint = "hsl(120 40% 55%)";
+const greenBg = "hsl(120 100% 4%)";
+const greenBg2 = "hsl(120 100% 3%)";
+const borderDim = "hsl(120 50% 12%)";
+const borderNorm = "hsl(120 100% 20%)";
+
 const socialLinks = [
-  {
-    href: "https://wa.me/254713046497",
-    icon: "📱",
-    label: "WhatsApp",
-    value: "+254 713 046 497",
-    full: false,
-  },
-  {
-    href: "https://www.youtube.com/@Silentwolf906",
-    icon: "▶",
-    label: "YouTube",
-    value: "@Silentwolf906",
-    full: false,
-  },
-  {
-    href: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y",
-    icon: "📡",
-    label: "WA Channel",
-    value: "wolfXnode Updates",
-    full: false,
-  },
-  {
-    href: "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",
-    icon: "👥",
-    label: "WA Group",
-    value: "wolfXnode Community",
-    full: false,
-  },
-  {
-    href: "https://wolfxnode.replit.app",
-    icon: "⚡",
-    label: "Platform",
-    value: "wolfXnode — WhatsApp Bot Hosting",
-    full: true,
-  },
+  { href: "https://wa.me/254713046497",          icon: "📱", label: "WhatsApp",  value: "+254 713 046 497",  full: false },
+  { href: "https://www.youtube.com/@Silentwolf906", icon: "▶", label: "YouTube", value: "@Silentwolf906",    full: false },
+  { href: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y", icon: "📡", label: "WA Channel", value: "wolfXnode Updates", full: false },
+  { href: "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",       icon: "👥", label: "WA Group",   value: "wolfXnode Community", full: false },
+  { href: "https://wolfxnode.replit.app",          icon: "⚡", label: "Platform", value: "wolfxnode.replit.app", full: true },
 ];
 
-const statsBadges = [
+const statBadges = [
   { value: "24/7", label: "Uptime" },
-  { value: "∞", label: "Bots Hosted" },
-  { value: "KE", label: "Based In" },
+  { value: "∞",    label: "Bots" },
+  { value: "KE",   label: "Base" },
 ];
 
+/* ─── Progress bar ───────────────────────────────────── */
 function ProgressBar({ stats }: { stats: Stats }) {
   const pct = Math.min(stats.percentage, 100);
   return (
-    <div
-      className="px-9 py-6"
-      style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span
-          className="text-[9px] tracking-widest uppercase font-bold"
-          style={{ color: "hsl(120 100% 50%)", fontFamily: "'JetBrains Mono', monospace" }}
-        >
-          Contact Collection Progress
+    <div style={{ padding: "14px 16px", borderBottom: `1px solid ${borderDim}` }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: green }}>
+          Contact Progress
         </span>
-        <span
-          className="text-[10px] font-bold"
-          style={{ color: "hsl(120 100% 50%)", fontFamily: "'Orbitron', sans-serif" }}
-        >
+        <span style={{ fontFamily: orb, fontSize: 11, fontWeight: 700, color: green }}>
           {stats.count} / {stats.target}
         </span>
       </div>
-      <div
-        className="relative w-full h-3 rounded-full overflow-hidden"
-        style={{ background: "hsl(120 30% 10%)", border: "1px solid hsl(120 50% 12%)" }}
-      >
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{
-            width: `${pct}%`,
-            background: stats.targetReached
-              ? "linear-gradient(90deg, hsl(120 100% 40%), hsl(120 100% 60%))"
-              : "linear-gradient(90deg, hsl(120 100% 30%), hsl(120 100% 50%))",
-            boxShadow: "0 0 10px hsl(120 100% 50% / 0.5)",
-          }}
-        />
+      <div style={{ width: "100%", height: 8, borderRadius: 99, overflow: "hidden", background: "hsl(120 30% 10%)", border: `1px solid ${borderDim}` }}>
+        <div style={{
+          height: "100%", borderRadius: 99,
+          width: `${pct}%`,
+          background: stats.targetReached
+            ? "linear-gradient(90deg, hsl(120 100% 40%), hsl(120 100% 60%))"
+            : "linear-gradient(90deg, hsl(120 100% 30%), hsl(120 100% 50%))",
+          boxShadow: "0 0 8px hsl(120 100% 50% / 0.45)",
+          transition: "width 0.7s ease",
+        }} />
       </div>
-      <div className="flex items-center justify-between mt-2">
-        <span className="text-[9px]" style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}>
-          {pct.toFixed(1)}% complete
-        </span>
-        {stats.targetReached ? (
-          <span
-            className="text-[9px] tracking-widest uppercase font-bold"
-            style={{ color: "hsl(120 100% 50%)", fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            ✓ Target reached!
-          </span>
-        ) : (
-          <span className="text-[9px]" style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}>
-            {stats.target - stats.count} remaining
-          </span>
-        )}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
+        <span style={{ fontFamily: mono, fontSize: 9, color: greenMuted }}>{pct.toFixed(0)}% complete</span>
+        {stats.targetReached
+          ? <span style={{ fontFamily: mono, fontSize: 9, color: green, fontWeight: 700 }}>✓ Target reached!</span>
+          : <span style={{ fontFamily: mono, fontSize: 9, color: greenMuted }}>{stats.target - stats.count} left</span>
+        }
       </div>
     </div>
   );
 }
 
-function ContactForm({ onSubmitted }: { onSubmitted: (stats: Stats) => void }) {
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [organization, setOrganization] = useState("");
+/* ─── Contact form ───────────────────────────────────── */
+function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
+  const [name, setName]       = useState("");
+  const [phone, setPhone]     = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [error, setError]     = useState("");
+  const [done, setDone]       = useState(false);
+  const [open, setOpen]       = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const inputBase: React.CSSProperties = {
+    width: "100%", fontFamily: mono, fontSize: 12,
+    background: greenBg2, border: `1px solid ${borderDim}`,
+    borderRadius: 8, padding: "9px 12px",
+    color: green, outline: "none", transition: "border-color 0.2s, box-shadow 0.2s",
+  };
+
+  function focus(e: React.FocusEvent<HTMLInputElement>) {
+    e.target.style.borderColor = borderNorm;
+    e.target.style.boxShadow   = "0 0 10px hsl(120 100% 50% / 0.12)";
+  }
+  function blur(e: React.FocusEvent<HTMLInputElement>) {
+    e.target.style.borderColor = borderDim;
+    e.target.style.boxShadow   = "none";
+  }
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!fullName.trim() || !phone.trim()) {
-      setError("Name and phone are required");
-      return;
-    }
-    setLoading(true);
-    setError("");
+    if (!name.trim() || !phone.trim()) { setError("Name and contact are required"); return; }
+    setLoading(true); setError("");
     try {
-      const result = await submitContact({
-        fullName: fullName.trim(),
-        phone: phone.trim(),
-        email: email.trim() || undefined,
-        organization: organization.trim() || undefined,
-      });
-      setSuccess(true);
-      onSubmitted(result.stats);
+      const r = await submitContact({ fullName: name.trim(), phone: phone.trim() });
+      setDone(true);
+      onSubmitted(r.stats);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -168,65 +132,34 @@ function ContactForm({ onSubmitted }: { onSubmitted: (stats: Stats) => void }) {
     }
   }
 
-  const inputStyle = {
-    width: "100%",
-    background: "hsl(120 100% 3%)",
-    border: "1px solid hsl(120 50% 12%)",
-    borderRadius: "8px",
-    padding: "10px 14px",
-    color: "hsl(120 100% 50%)",
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: "12px",
-    outline: "none",
-    transition: "border-color 0.2s, box-shadow 0.2s",
-  };
-
-  if (success) {
+  if (done) {
     return (
-      <div
-        className="px-9 py-7"
-        style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-      >
-        <div
-          className="flex flex-col items-center gap-3 py-4 rounded-xl text-center"
-          style={{
-            background: "hsl(120 100% 50% / 0.05)",
-            border: "1px solid hsl(120 100% 50% / 0.2)",
-          }}
-        >
-          <div
-            className="text-3xl"
-            style={{ filter: "drop-shadow(0 0 8px hsl(120 100% 50%))" }}
-          >
-            ✓
-          </div>
-          <div
-            className="text-sm font-bold glow-text"
-            style={{ color: "hsl(120 100% 50%)", fontFamily: "'Orbitron', sans-serif" }}
-          >
-            Contact Saved!
-          </div>
-          <div
-            className="text-[10px] tracking-wide"
-            style={{ color: "hsl(120 40% 55%)", fontFamily: "'JetBrains Mono', monospace" }}
-          >
-            Your contact has been added to the collection.
-          </div>
+      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${borderDim}` }}>
+        <div style={{
+          display: "flex", flexDirection: "column", alignItems: "center",
+          gap: 8, padding: "14px 12px", borderRadius: 10, textAlign: "center",
+          background: "hsl(120 100% 50% / 0.05)", border: "1px solid hsl(120 100% 50% / 0.2)",
+        }}>
+          <span style={{ fontSize: 22, filter: "drop-shadow(0 0 6px hsl(120 100% 50%))" }}>✓</span>
+          <span style={{ fontFamily: orb, fontSize: 11, color: green }} className="glow-text">Contact Saved!</span>
+          <span style={{ fontFamily: mono, fontSize: 10, color: greenFaint }}>You've been added to the collection.</span>
         </div>
       </div>
     );
   }
 
-  if (!showForm) {
+  if (!open) {
     return (
-      <div
-        className="px-9 py-7"
-        style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-      >
+      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${borderDim}` }}>
         <button
-          onClick={() => setShowForm(true)}
-          className="btn-primary-glow flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-xs tracking-widest uppercase cursor-pointer border-none w-full"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          onClick={() => setOpen(true)}
+          className="btn-primary-glow"
+          style={{
+            width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 8, padding: "12px 20px", borderRadius: 10,
+            border: "none", cursor: "pointer", fontFamily: mono,
+            fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+          }}
         >
           + Add Your Contact
         </button>
@@ -235,471 +168,281 @@ function ContactForm({ onSubmitted }: { onSubmitted: (stats: Stats) => void }) {
   }
 
   return (
-    <div
-      className="px-9 py-7"
-      style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-    >
-      <div className="mb-5">
-        <div
-          className="text-[10px] tracking-widest uppercase font-bold mb-1"
-          style={{ color: "hsl(120 100% 50%)", fontFamily: "'JetBrains Mono', monospace" }}
-        >
-          Add Your Contact
-        </div>
-        <div
-          className="text-[9px] tracking-wide"
-          style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}
-        >
-          Submit your info to be included in the collection
+    <div style={{ padding: "14px 16px", borderBottom: `1px solid ${borderDim}` }}>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: greenMuted }}>
+          Submit your contact
         </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="text-[9px] tracking-widest uppercase"
-              style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Full Name *
-            </label>
-            <input
-              type="text"
-              placeholder="Your name"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              style={inputStyle}
-              onFocus={(e) => {
-                e.target.style.borderColor = "hsl(120 100% 20%)";
-                e.target.style.boxShadow = "0 0 12px hsl(120 100% 50% / 0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "hsl(120 50% 12%)";
-                e.target.style.boxShadow = "none";
-              }}
-              required
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="text-[9px] tracking-widest uppercase"
-              style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Phone *
-            </label>
-            <input
-              type="tel"
-              placeholder="+254..."
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              style={inputStyle}
-              onFocus={(e) => {
-                e.target.style.borderColor = "hsl(120 100% 20%)";
-                e.target.style.boxShadow = "0 0 12px hsl(120 100% 50% / 0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "hsl(120 50% 12%)";
-                e.target.style.boxShadow = "none";
-              }}
-              required
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="text-[9px] tracking-widest uppercase"
-              style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Email (optional)
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-              onFocus={(e) => {
-                e.target.style.borderColor = "hsl(120 100% 20%)";
-                e.target.style.boxShadow = "0 0 12px hsl(120 100% 50% / 0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "hsl(120 50% 12%)";
-                e.target.style.boxShadow = "none";
-              }}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label
-              className="text-[9px] tracking-widest uppercase"
-              style={{ color: "hsl(120 20% 30%)", fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              Organization (optional)
-            </label>
-            <input
-              type="text"
-              placeholder="Company / Group"
-              value={organization}
-              onChange={(e) => setOrganization(e.target.value)}
-              style={inputStyle}
-              onFocus={(e) => {
-                e.target.style.borderColor = "hsl(120 100% 20%)";
-                e.target.style.boxShadow = "0 0 12px hsl(120 100% 50% / 0.15)";
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "hsl(120 50% 12%)";
-                e.target.style.boxShadow = "none";
-              }}
-            />
-          </div>
-        </div>
-
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <input
+          type="text" placeholder="Your name"
+          value={name} onChange={e => setName(e.target.value)}
+          style={inputBase} onFocus={focus} onBlur={blur} required
+        />
+        <input
+          type="tel" placeholder="Phone / WhatsApp number"
+          value={phone} onChange={e => setPhone(e.target.value)}
+          style={inputBase} onFocus={focus} onBlur={blur} required
+        />
         {error && (
-          <div
-            className="text-[10px] px-3 py-2 rounded-lg"
-            style={{
-              color: "hsl(0 84% 70%)",
-              background: "hsl(0 84% 60% / 0.1)",
-              border: "1px solid hsl(0 84% 60% / 0.3)",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            ⚠ {error}
-          </div>
+          <div style={{
+            fontFamily: mono, fontSize: 10, padding: "7px 10px", borderRadius: 7,
+            color: "hsl(0 84% 70%)", background: "hsl(0 84% 60% / 0.1)",
+            border: "1px solid hsl(0 84% 60% / 0.3)",
+          }}>⚠ {error}</div>
         )}
-
-        <div className="flex gap-3 mt-1">
+        <div style={{ display: "flex", gap: 8 }}>
           <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className="btn-secondary-glow flex items-center justify-center py-3 px-5 rounded-xl font-bold text-xs tracking-widest uppercase cursor-pointer"
-            style={{ fontFamily: "'JetBrains Mono', monospace", flex: "0 0 auto" }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary-glow flex items-center justify-center gap-2 py-3 px-6 rounded-xl font-bold text-xs tracking-widest uppercase cursor-pointer border-none"
+            type="button" onClick={() => { setOpen(false); setError(""); }}
+            className="btn-secondary-glow"
             style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              flex: 1,
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? "not-allowed" : "pointer",
+              flexShrink: 0, padding: "10px 14px", borderRadius: 8,
+              cursor: "pointer", fontFamily: mono, fontSize: 10,
+              fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
             }}
-          >
-            {loading ? "Saving..." : "⬇ Save Contact"}
-          </button>
+          >Cancel</button>
+          <button
+            type="submit" disabled={loading}
+            className="btn-primary-glow"
+            style={{
+              flex: 1, padding: "10px 14px", borderRadius: 8,
+              border: "none", cursor: loading ? "not-allowed" : "pointer",
+              fontFamily: mono, fontSize: 10, fontWeight: 700,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              opacity: loading ? 0.7 : 1,
+            }}
+          >{loading ? "Saving…" : "⬇ Save Contact"}</button>
         </div>
       </form>
     </div>
   );
 }
 
+/* ─── Main page ──────────────────────────────────────── */
 export default function DigitalCard() {
   const [stats, setStats] = useState<Stats | null>(null);
 
-  useEffect(() => {
-    fetchStats()
-      .then(setStats)
-      .catch(() => {});
-  }, []);
+  useEffect(() => { fetchStats().then(setStats).catch(() => {}); }, []);
 
   return (
-    <div
-      className="relative z-10 min-h-screen flex flex-col items-center px-4 py-6 pb-16"
-      style={{ fontFamily: "'JetBrains Mono', monospace" }}
-    >
-      {/* Floating orbs */}
+    <div style={{
+      position: "relative", zIndex: 1,
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", padding: "12px 12px 48px",
+      fontFamily: mono,
+    }}>
       <div className="orb orb-1" />
       <div className="orb orb-2" />
       <div className="orb orb-3" />
 
       {/* Top nav */}
-      <nav
-        className="w-full max-w-[700px] flex items-center justify-between px-5 py-4 mb-8 rounded-xl backdrop-blur-md"
-        style={{
-          background: "hsl(120 100% 3% / 0.8)",
-          border: "1px solid hsl(120 50% 12%)",
-        }}
-      >
-        <div
-          className="font-black tracking-wide glow-text"
-          style={{
-            fontFamily: "'Orbitron', sans-serif",
-            fontSize: "16px",
-            color: "hsl(120 100% 50%)",
-          }}
-        >
-          wolf<span style={{ color: "hsl(120 100% 80%)" }}>X</span>node
+      <nav style={{
+        width: "100%", maxWidth: 480,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "10px 14px", marginBottom: 14, borderRadius: 10,
+        background: "hsl(120 100% 3% / 0.85)", border: `1px solid ${borderDim}`,
+        backdropFilter: "blur(12px)",
+      }}>
+        <div style={{ fontFamily: orb, fontSize: 13, fontWeight: 900, letterSpacing: "0.05em", color: green }} className="glow-text">
+          WOLF<span style={{ color: "hsl(120 100% 78%)" }}>TECH</span>{" "}
+          <span style={{ color: greenDim }}>VCF</span>
         </div>
-        <div
-          className="text-[10px] tracking-widest px-3 py-1 rounded-full"
-          style={{
-            color: "hsl(120 20% 30%)",
-            border: "1px solid hsl(120 50% 12%)",
-            fontFamily: "'JetBrains Mono', monospace",
-          }}
-        >
-          DIGITAL CARD v1.0
+        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: "0.1em", color: greenMuted, border: `1px solid ${borderDim}`, padding: "2px 8px", borderRadius: 99 }}>
+          v1.0
         </div>
       </nav>
 
-      {/* Main card */}
+      {/* Card */}
       <div
-        className="w-full max-w-[700px] rounded-[20px] overflow-hidden card-animate glow-box-lg"
+        className="card-animate glow-box-lg"
         style={{
-          background: "hsl(120 100% 4%)",
-          border: "1px solid hsl(120 100% 20%)",
+          width: "100%", maxWidth: 480,
+          background: greenBg, border: `1px solid ${borderNorm}`,
+          borderRadius: 16, overflow: "hidden",
         }}
       >
-        {/* Top accent strip */}
-        <div
-          className="h-[3px]"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent, hsl(120 100% 50%), hsl(120 100% 40%), transparent)",
-          }}
-        />
+        {/* Accent strip */}
+        <div style={{ height: 2, background: "linear-gradient(90deg, transparent, hsl(120 100% 50%), hsl(120 100% 40%), transparent)" }} />
 
         {/* Header */}
-        <div
-          className="flex items-center gap-7 px-9 py-9 pb-7 relative"
-          style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-        >
+        <div style={{
+          display: "flex", alignItems: "center", gap: 14,
+          padding: "16px 16px 14px", borderBottom: `1px solid ${borderDim}`,
+        }}>
+          {/* Avatar */}
           <div
-            className="relative flex-shrink-0 w-[88px] h-[88px] rounded-full flex items-center justify-center glow-box"
+            className="glow-box"
             style={{
-              background: "hsl(120 30% 10%)",
-              border: "2px solid hsl(120 100% 20%)",
-              fontFamily: "'Orbitron', sans-serif",
-              fontSize: "28px",
-              fontWeight: 900,
-              color: "hsl(120 100% 50%)",
+              position: "relative", flexShrink: 0,
+              width: 60, height: 60, borderRadius: "50%",
+              background: "hsl(120 30% 10%)", border: `2px solid ${borderNorm}`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: orb, fontSize: 20, fontWeight: 900, color: green,
             }}
           >
             W
             <div className="avatar-ring" />
           </div>
 
-          <div className="flex-1 min-w-0">
-            <div
-              className="font-black tracking-wide leading-tight glow-text"
-              style={{
-                fontFamily: "'Orbitron', sans-serif",
-                fontSize: "clamp(20px, 4vw, 28px)",
-                color: "hsl(120 100% 50%)",
-              }}
-            >
+          {/* Identity */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="glow-text" style={{ fontFamily: orb, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: 900, color: green, letterSpacing: "0.04em", lineHeight: 1.2 }}>
               Silentwolf
             </div>
-            <div
-              className="text-[11px] mt-1.5 tracking-widest uppercase"
-              style={{ color: "hsl(120 40% 55%)" }}
-            >
-              Bot Developer &amp; System Explorer
+            <div style={{ fontSize: 9, color: greenFaint, marginTop: 4, letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              Bot Dev &amp; System Explorer
             </div>
-            <div
-              className="text-[11px] mt-1"
-              style={{
-                color: "hsl(120 20% 30%)",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
-              <span style={{ color: "hsl(120 50% 40%)" }}>@</span>Silentwolf906
+            <div style={{ fontSize: 10, color: greenMuted, marginTop: 2 }}>
+              <span style={{ color: greenDim }}>@</span>Silentwolf906
             </div>
-            <div
-              className="inline-flex items-center gap-1.5 text-[9px] tracking-widest uppercase mt-2.5 px-2.5 py-1 rounded-full"
-              style={{
-                color: "hsl(120 100% 50%)",
-                border: "1px solid hsl(120 100% 50% / 0.3)",
-                background: "hsl(120 100% 50% / 0.05)",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase",
+              color: green, border: "1px solid hsl(120 100% 50% / 0.3)",
+              background: "hsl(120 100% 50% / 0.05)", padding: "3px 8px",
+              borderRadius: 99, marginTop: 6,
+            }}>
               <div className="status-dot" />
               Available
             </div>
           </div>
         </div>
 
-        {/* Progress bar */}
+        {/* Progress */}
         {stats && <ProgressBar stats={stats} />}
 
-        {/* Contact form */}
+        {/* Form */}
         <ContactForm onSubmitted={setStats} />
 
-        {/* Social Links */}
-        <div
-          className="px-9 py-7 grid grid-cols-2 gap-3"
-          style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-        >
-          {socialLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`link-card${link.full ? " col-span-2" : ""}`}
-            >
-              <div className="link-icon-box">{link.icon}</div>
-              <div className="min-w-0 flex-1">
-                <div
-                  className="text-[9px] tracking-widest uppercase mb-0.5"
-                  style={{ color: "hsl(120 20% 30%)" }}
-                >
-                  {link.label}
+        {/* Social links */}
+        <div style={{ padding: "12px 16px", borderBottom: `1px solid ${borderDim}` }}>
+          {/* Row 1: WhatsApp + YouTube */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            {socialLinks.slice(0, 2).map(l => (
+              <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="link-card">
+                <div className="link-icon-box">{l.icon}</div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: 8, color: greenMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2 }}>{l.label}</div>
+                  <div style={{ fontSize: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.value}</div>
                 </div>
-                <div
-                  className="text-[11px] truncate"
-                  style={{ fontFamily: "'JetBrains Mono', monospace" }}
-                >
-                  {link.value}
-                </div>
-              </div>
-            </a>
-          ))}
+              </a>
+            ))}
+          </div>
+          {/* Row 2: WA Channel + WA Group (short) */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+            {socialLinks.slice(2, 4).map(l => (
+              <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="link-card" style={{ justifyContent: "center", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 8px", textAlign: "center" }}>
+                <span style={{ fontSize: 18 }}>{l.icon}</span>
+                <span style={{ fontSize: 9, color: greenMuted, letterSpacing: "0.08em", textTransform: "uppercase" }}>{l.label}</span>
+                <span style={{ fontSize: 10, color: greenFaint }}>Join →</span>
+              </a>
+            ))}
+          </div>
+          {/* Platform full-width */}
+          <a href={socialLinks[4].href} target="_blank" rel="noopener noreferrer" className="link-card">
+            <div className="link-icon-box">{socialLinks[4].icon}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 8, color: greenMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 2 }}>Platform</div>
+              <div style={{ fontSize: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>wolfxnode.replit.app</div>
+            </div>
+          </a>
         </div>
 
         {/* Stats */}
-        <div
-          className="px-9 py-5 grid grid-cols-3 gap-3"
-          style={{ borderBottom: "1px solid hsl(120 50% 12%)" }}
-        >
-          {statsBadges.map((stat) => (
-            <div
-              key={stat.label}
-              className="text-center py-4 px-2 rounded-xl"
-              style={{
-                background: "hsl(120 100% 3%)",
-                border: "1px solid hsl(120 50% 12%)",
-              }}
-            >
-              <div
-                className="font-black leading-none glow-text"
-                style={{
-                  fontFamily: "'Orbitron', sans-serif",
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  color: "hsl(120 100% 50%)",
-                }}
-              >
-                {stat.value}
-              </div>
-              <div
-                className="text-[9px] tracking-widest uppercase mt-1.5"
-                style={{ color: "hsl(120 20% 30%)" }}
-              >
-                {stat.label}
-              </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, padding: "12px 16px", borderBottom: `1px solid ${borderDim}` }}>
+          {statBadges.map(s => (
+            <div key={s.label} style={{
+              textAlign: "center", padding: "12px 6px", borderRadius: 10,
+              background: greenBg2, border: `1px solid ${borderDim}`,
+            }}>
+              <div className="glow-text" style={{ fontFamily: orb, fontSize: 17, fontWeight: 700, color: green }}>{s.value}</div>
+              <div style={{ fontFamily: mono, fontSize: 8, color: greenMuted, letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 4 }}>{s.label}</div>
             </div>
           ))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="px-9 py-7 flex flex-col gap-3">
+        {/* Download / locked */}
+        <div style={{ padding: "12px 16px" }}>
           {stats?.targetReached ? (
             <button
               onClick={downloadVcf}
-              className="btn-primary-glow flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-xs tracking-widest uppercase cursor-pointer border-none w-full"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
+              className="btn-primary-glow"
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 8, padding: "12px 20px", borderRadius: 10,
+                border: "none", cursor: "pointer", fontFamily: mono,
+                fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase",
+                marginBottom: 8,
+              }}
             >
               ⬇ Download All Contacts (.vcf)
             </button>
           ) : (
-            <div
-              className="flex items-center justify-center py-4 px-6 rounded-xl text-[11px] tracking-wide"
-              style={{
-                background: "hsl(120 100% 3%)",
-                border: "1px solid hsl(120 50% 12%)",
-                color: "hsl(120 20% 30%)",
-                fontFamily: "'JetBrains Mono', monospace",
-              }}
-            >
-              🔒 VCF download unlocks at{" "}
-              <span style={{ color: "hsl(120 100% 50%)", marginLeft: 4 }}>
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "10px 14px", borderRadius: 10, marginBottom: 8,
+              background: greenBg2, border: `1px solid ${borderDim}`,
+              fontFamily: mono, fontSize: 10, color: greenMuted,
+            }}>
+              🔒 VCF unlocks at{" "}
+              <span style={{ color: green, marginLeft: 4, fontWeight: 700 }}>
                 {stats?.target ?? 50} contacts
               </span>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             <a
               href="https://wa.me/254713046497"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary-glow flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-xs tracking-widest uppercase text-center"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              💬 Message Me
-            </a>
+              target="_blank" rel="noopener noreferrer"
+              className="btn-secondary-glow"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 6, padding: "10px 8px", borderRadius: 10,
+                fontFamily: mono, fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.06em", textTransform: "uppercase",
+                textDecoration: "none", textAlign: "center",
+              }}
+            >💬 Message</a>
             <a
               href="https://wolfxnode.replit.app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secondary-glow flex items-center justify-center gap-2 py-4 px-6 rounded-xl font-bold text-xs tracking-widest uppercase text-center"
-              style={{ fontFamily: "'JetBrains Mono', monospace" }}
-            >
-              🚀 Visit Platform
-            </a>
+              target="_blank" rel="noopener noreferrer"
+              className="btn-secondary-glow"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                gap: 6, padding: "10px 8px", borderRadius: 10,
+                fontFamily: mono, fontSize: 10, fontWeight: 700,
+                letterSpacing: "0.06em", textTransform: "uppercase",
+                textDecoration: "none", textAlign: "center",
+              }}
+            >🚀 Platform</a>
           </div>
         </div>
 
         {/* Footer */}
-        <div
-          className="flex items-center justify-between px-9 py-4"
-          style={{
-            background: "hsl(120 100% 2% / 0.6)",
-            borderTop: "1px solid hsl(120 50% 12%)",
-          }}
-        >
-          <div
-            className="text-[10px]"
-            style={{
-              color: "hsl(120 20% 30%)",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            powered by{" "}
-            <span style={{ color: "hsl(120 100% 50%)" }}>wolfXnode</span>
-            <span className="cursor-blink" />
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 16px",
+          background: "hsl(120 100% 2% / 0.6)", borderTop: `1px solid ${borderDim}`,
+        }}>
+          <div style={{ fontFamily: mono, fontSize: 9, color: greenMuted }}>
+            powered by <span style={{ color: green }}>WOLFTECH</span><span className="cursor-blink" />
           </div>
-          <div
-            className="text-[9px] tracking-widest"
-            style={{
-              color: "hsl(120 20% 30%)",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
+          <div style={{ fontFamily: mono, fontSize: 8, color: greenMuted, letterSpacing: "0.1em" }}>
             ID: WOLF-906-VCF
           </div>
         </div>
       </div>
 
-      {/* Bottom tagline */}
-      <p
-        className="mt-7 text-center text-[10px] tracking-widest uppercase"
-        style={{
-          color: "hsl(120 20% 30%)",
-          fontFamily: "'JetBrains Mono', monospace",
-        }}
-      >
+      {/* Tagline */}
+      <p style={{ marginTop: 16, textAlign: "center", fontFamily: mono, fontSize: 9, color: greenMuted, letterSpacing: "0.12em", textTransform: "uppercase" }}>
         I am just an explorer &nbsp;·&nbsp;{" "}
         <a
           href="https://wolfxnode.replit.app"
-          style={{
-            color: "hsl(120 50% 40%)",
-            textDecoration: "none",
-            transition: "color 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.color = "hsl(120 100% 50%)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "hsl(120 50% 40%)")
-          }
-        >
-          wolfxnode.replit.app
-        </a>
+          style={{ color: greenDim, textDecoration: "none", transition: "color 0.2s" }}
+          onMouseEnter={e => (e.currentTarget.style.color = green)}
+          onMouseLeave={e => (e.currentTarget.style.color = greenDim)}
+        >wolfxnode.replit.app</a>
       </p>
     </div>
   );

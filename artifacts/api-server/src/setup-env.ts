@@ -1,10 +1,6 @@
-// Internal startup file — loads config.ts (project root) into the runtime
-// before the database connection is opened. Do not move or delete.
+// Internal startup file — always applies config.ts before the database opens.
+// To change database or PIN, edit config.ts at the project root.
 import { config } from "../../../config";
 
-if (!process.env["DATABASE_URL"]) {
-  process.env["DATABASE_URL"] = config.DATABASE_URL;
-}
-if (!process.env["ADMIN_PIN"]) {
-  process.env["ADMIN_PIN"] = config.ADMIN_PIN;
-}
+process.env["DATABASE_URL"] = config.DATABASE_URL;
+process.env["ADMIN_PIN"]    = config.ADMIN_PIN;

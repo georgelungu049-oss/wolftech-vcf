@@ -3,12 +3,13 @@ import { db } from "@workspace/db";
 import { contactsTable, settingsTable } from "@workspace/db/schema";
 import { SubmitContactBody } from "@workspace/api-zod";
 import { eq, count } from "drizzle-orm";
+import { config } from "../config";
 
 const router: IRouter = Router();
 
 async function getStats() {
   const [row] = await db.select().from(settingsTable).where(eq(settingsTable.key, "target"));
-  const target = row?.value ?? 50;
+  const target = row?.value ?? config.CONTACT_TARGET;
   const [countRow] = await db.select({ count: count() }).from(contactsTable);
   const contactCount = Number(countRow?.count ?? 0);
   const percentage = Math.min((contactCount / target) * 100, 100);

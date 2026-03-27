@@ -1,3 +1,4 @@
+import "./setup-env"; // must be first — sets DATABASE_URL + ADMIN_PIN from config.ts
 import app from "./app";
 import { logger } from "./lib/logger";
 

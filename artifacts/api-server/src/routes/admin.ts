@@ -2,10 +2,11 @@ import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
 import { contactsTable, settingsTable } from "@workspace/db/schema";
 import { eq, count, desc } from "drizzle-orm";
+import { config } from "../config";
 
 const router: IRouter = Router();
 
-const ADMIN_PIN = process.env["ADMIN_PIN"] ?? "wolf906";
+const ADMIN_PIN = process.env["ADMIN_PIN"] ?? config.ADMIN_PIN;
 
 function checkAuth(req: import("express").Request, res: import("express").Response): boolean {
   const pin = req.headers["x-admin-pin"] ?? req.query["pin"];

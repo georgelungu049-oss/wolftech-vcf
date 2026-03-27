@@ -1,0 +1,11 @@
+{
+  "buildCommand": "pnpm --filter @workspace/vcf-card run build",
+  "outputDirectory": "artifacts/vcf-card/dist/public",
+  "installCommand": "pnpm install",
+  "env": {
+    "BASE_PATH": "/"
+  },
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

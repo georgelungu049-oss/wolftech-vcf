@@ -76,7 +76,7 @@ export default function Admin() {
 
   async function deleteContact(id: number) {
     setDeleting(id);
-    await api(`/contacts/${id}`, { method: "DELETE" }, pin);
+    await api(`/contacts?id=${id}`, { method: "DELETE" }, pin);
     setContacts(prev => prev.filter(c => c.id !== id));
     setStats(prev => prev ? { ...prev, count: prev.count - 1, percentage: Math.min(((prev.count - 1) / prev.target) * 100, 100), targetReached: (prev.count - 1) >= prev.target } : prev);
     setDeleting(null);

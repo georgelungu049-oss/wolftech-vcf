@@ -73,12 +73,12 @@ router.put("/target", async (req, res) => {
   }
 });
 
-/* DELETE /api/admin/contacts/:id */
-router.delete("/contacts/:id", async (req, res) => {
+/* DELETE /api/admin/contacts?id=X */
+router.delete("/contacts", async (req, res) => {
   if (!checkAuth(req, res)) return;
-  const id = Number(req.params["id"]);
+  const id = Number(req.query["id"]);
   if (!Number.isInteger(id) || id < 1) {
-    res.status(422).json({ error: "Invalid id" });
+    res.status(422).json({ error: "Provide a valid ?id= query param" });
     return;
   }
   try {

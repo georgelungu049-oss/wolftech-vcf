@@ -1,0 +1,286 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --font-sans: var(--app-font-sans);
+  --font-mono: var(--app-font-mono);
+  --font-orb: var(--app-font-orb);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --background: 120 100% 2%;
+  --foreground: 120 100% 50%;
+  --border: 120 100% 20%;
+  --input: 120 50% 12%;
+  --ring: 120 100% 50%;
+
+  --card: 120 100% 4%;
+  --card-foreground: 120 100% 50%;
+
+  --primary: 120 100% 50%;
+  --primary-foreground: 120 100% 2%;
+
+  --secondary: 120 100% 3%;
+  --secondary-foreground: 120 40% 55%;
+
+  --muted: 120 30% 10%;
+  --muted-foreground: 120 20% 30%;
+
+  --accent: 120 50% 12%;
+  --accent-foreground: 120 100% 50%;
+
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+
+  --app-font-sans: 'JetBrains Mono', monospace;
+  --app-font-mono: 'JetBrains Mono', monospace;
+  --app-font-orb: 'Orbitron', sans-serif;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--app-font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+}
+
+/* Animated grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(hsl(120 100% 50% / 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(120 100% 50% / 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    hsl(120 100% 50% / 0.01) 2px,
+    hsl(120 100% 50% / 0.01) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Floating orb animations */
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-30px) scale(1.05); }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ringPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+.orb-1 { width: 400px; height: 400px; background: hsl(120 100% 50% / 0.06); top: -100px; right: -100px; animation-delay: 0s; }
+.orb-2 { width: 300px; height: 300px; background: hsl(120 100% 50% / 0.04); bottom: 10%; left: -80px; animation-delay: -3s; }
+.orb-3 { width: 200px; height: 200px; background: hsl(120 100% 50% / 0.05); top: 50%; left: 50%; animation-delay: -5s; }
+
+.card-animate {
+  animation: cardIn 0.7s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1px solid hsl(120 100% 50% / 0.2);
+  animation: ringPulse 2.5s ease-in-out infinite;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 6px hsl(var(--primary));
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+.cursor-blink {
+  display: inline-block;
+  width: 6px;
+  height: 12px;
+  background: hsl(var(--primary));
+  margin-left: 3px;
+  vertical-align: middle;
+  animation: cursorBlink 1.2s step-end infinite;
+}
+
+.glow-text {
+  text-shadow: 0 0 24px hsl(120 100% 50% / 0.35);
+}
+
+.glow-box {
+  box-shadow: 0 0 24px hsl(120 100% 50% / 0.35);
+}
+
+.glow-box-lg {
+  box-shadow: 0 0 60px hsl(120 100% 50% / 0.2), 0 0 120px hsl(120 100% 50% / 0.1), 0 40px 80px rgba(0,0,0,0.6);
+}
+
+.font-orb {
+  font-family: var(--app-font-orb);
+}
+
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: hsl(120 100% 3%);
+  border: 1px solid hsl(120 50% 12%);
+  border-radius: 12px;
+  text-decoration: none;
+  color: hsl(120 40% 55%);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.link-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, hsl(120 100% 50% / 0.05), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.link-card:hover {
+  border-color: hsl(120 100% 20%);
+  color: hsl(120 100% 50%);
+  box-shadow: 0 0 24px hsl(120 100% 50% / 0.35);
+  transform: translateY(-1px);
+}
+
+.link-card:hover::before {
+  opacity: 1;
+}
+
+.link-card:hover .link-icon-box {
+  border-color: hsl(120 100% 20%);
+  box-shadow: 0 0 12px hsl(120 100% 50% / 0.2);
+}
+
+.link-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid hsl(120 50% 12%);
+  background: hsl(120 30% 10%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.btn-primary-glow {
+  background: hsl(120 100% 50%);
+  color: hsl(120 100% 2%);
+  box-shadow: 0 0 24px hsl(120 100% 50% / 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-primary-glow:hover {
+  background: hsl(120 100% 60%);
+  box-shadow: 0 0 40px hsl(120 100% 50% / 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-secondary-glow {
+  background: transparent;
+  color: hsl(120 100% 50%);
+  border: 1px solid hsl(120 100% 20%);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary-glow:hover {
+  background: hsl(120 100% 50% / 0.07);
+  box-shadow: 0 0 24px hsl(120 100% 50% / 0.35);
+  transform: translateY(-2px);
+}

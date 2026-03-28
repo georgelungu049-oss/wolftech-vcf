@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 interface Stats {
   count: number;
@@ -90,7 +92,7 @@ function ProgressBar({ stats }: { stats: Stats }) {
 /* ─── Contact form ─── */
 function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
   const [name, setName]       = useState("");
-  const [phone, setPhone]     = useState("");
+  const [phone, setPhone]     = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState("");
   const [done, setDone]       = useState(false);
@@ -107,10 +109,12 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim() || !phone.trim()) { setError("Name and contact are required"); return; }
+    if (!name.trim()) { setError("Name is required"); return; }
+    if (!phone)       { setError("Phone number is required"); return; }
+    if (!isValidPhoneNumber(phone)) { setError("Please enter a valid international phone number"); return; }
     setLoading(true); setError("");
     try {
-      const r = await submitContact({ fullName: name.trim(), phone: phone.trim() });
+      const r = await submitContact({ fullName: name.trim(), phone });
       setDone(true);
       onSubmitted(r.stats);
     } catch (err) {
@@ -158,15 +162,37 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
         Submit your contact
       </div>
       <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <input type="text"    placeholder="Your name"               value={name}  onChange={e => setName(e.target.value)}  style={inputBase} onFocus={onFocus} onBlur={onBlur} required />
-        <input type="tel"     placeholder="Phone / WhatsApp number" value={phone} onChange={e => setPhone(e.target.value)} style={inputBase} onFocus={onFocus} onBlur={onBlur} required />
+        <input
+          type="text"
+          placeholder="Your full name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          style={inputBase}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          required
+        />
+        {/* International phone input with country flag selector */}
+        <PhoneInput
+          international
+          countryCallingCodeEditable={false}
+          defaultCountry="KE"
+          placeholder="Phone / WhatsApp number"
+          value={phone}
+          onChange={setPhone}
+        />
+        {phone && isValidPhoneNumber(phone) && (
+          <div style={{ fontFamily: mono, fontSize: 9, color: C.dim, marginTop: -4, paddingLeft: 2 }}>
+            ✓ Valid — will save as: <span style={{ color: C.green }}>{phone}</span>
+          </div>
+        )}
         {error && (
           <div style={{ fontFamily: mono, fontSize: 10, padding: "6px 10px", borderRadius: 6, color: "hsl(0 55% 55%)", background: "hsl(0 55% 50% / 0.08)", border: "1px solid hsl(0 55% 50% / 0.22)" }}>
             ⚠ {error}
           </div>
         )}
         <div style={{ display: "flex", gap: 8 }}>
-          <button type="button" onClick={() => { setOpen(false); setError(""); }}
+          <button type="button" onClick={() => { setOpen(false); setError(""); setPhone(undefined); }}
             className="btn-secondary-glow"
             style={{ flexShrink: 0, padding: "9px 13px", borderRadius: 8, cursor: "pointer", fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Cancel

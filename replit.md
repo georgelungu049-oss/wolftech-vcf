@@ -11,8 +11,8 @@ Project: **WOLF TECH VCF** — a dark-themed digital contact card with a crowd-s
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5 (local dev) / Vercel Serverless Functions (production)
-- **Database**: Neon PostgreSQL + Drizzle ORM
+- **API framework**: Express 5
+- **Database**: Replit PostgreSQL + Drizzle ORM
 - **Validation**: Zod
 - **Frontend**: React 19 + Vite 7 + TailwindCSS 4 + Wouter
 
@@ -20,28 +20,23 @@ Project: **WOLF TECH VCF** — a dark-themed digital contact card with a crowd-s
 
 ```text
 .
-├── api/                    # Vercel serverless functions (production)
-│   ├── contacts/           #   POST, GET stats, download VCF
-│   ├── admin/              #   PIN-protected admin endpoints
-│   ├── _db.ts              #   DB connection + auto table creation
-│   ├── _auth.ts            #   PIN auth helper
-│   └── _vcf.ts             #   VCF file generator
-│
 ├── artifacts/
-│   ├── vcf-card/           # React + Vite frontend
+│   ├── vcf-card/           # React + Vite frontend (port 25326)
 │   │   ├── src/pages/
 │   │   │   ├── DigitalCard.tsx   # Public contact card
 │   │   │   └── Admin.tsx         # Admin panel (/admin)
 │   │   └── public/               # favicon, og-image.png
-│   └── api-server/         # Express server (Replit local dev only)
+│   └── api-server/         # Express API server (port 8080)
+│       └── src/
+│           ├── routes/     # contacts, admin, health
+│           └── setup-env.ts
 │
 ├── lib/
 │   ├── db/                 # Drizzle ORM + schema (contacts, settings tables)
 │   └── api-zod/            # Zod validation schemas
 │
-├── config.ts               # Single config: DATABASE_URL, ADMIN_PIN, CONTACT_TARGET
-├── vercel.json             # Vercel build + routing config
-└── README.md
+├── config.ts               # Reads DATABASE_URL, ADMIN_PIN, CONTACT_TARGET from env
+└── vercel.json             # Legacy Vercel config (no longer active)
 ```
 
 ## Applications
@@ -59,7 +54,7 @@ Project: **WOLF TECH VCF** — a dark-themed digital contact card with a crowd-s
 
 ### `artifacts/api-server` — Express API Server
 
-Used only in local/Replit development. The same logic lives in `api/` as Vercel functions.
+Runs on port 8080. Routes: `/api/contacts`, `/api/admin`, `/api/healthz`.
 
 ## Database Schema
 
@@ -69,6 +64,8 @@ Used only in local/Replit development. The same logic lives in `api/` as Vercel 
 | id | serial PK | Auto-increment |
 | full_name | text | Required |
 | phone | text UNIQUE | E.164 format, prevents duplicates |
+| email | text | Optional |
+| organization | text | Optional |
 | created_at | timestamp | Auto |
 
 ### `settings` table
@@ -78,22 +75,26 @@ Used only in local/Replit development. The same logic lives in `api/` as Vercel 
 | key | text UNIQUE | e.g. `'target'` |
 | value | integer | e.g. `100` |
 
-Tables are auto-created on first API call — no migration needed.
+Run `cd lib/db && pnpm run push` to apply schema changes to the database.
 
-## Config
+## Environment Variables / Secrets
 
-All environment-sensitive values live in `config.ts`:
-- `DATABASE_URL` — Neon PostgreSQL connection string
-- `ADMIN_PIN` — protects `/admin`
-- `CONTACT_TARGET` — how many contacts unlock the VCF
+All sensitive values are in Replit Secrets (never hardcoded):
+- `DATABASE_URL` — auto-provided by Replit's built-in PostgreSQL
+- `ADMIN_PIN` — protects `/admin` panel
+- `CONTACT_TARGET` — set as env var (default: 50)
+
+## Workflows
+
+- **Start application** — Vite dev server for the frontend (`PORT=25326`)
+- **API Server** — Express backend (`PORT=8080`)
 
 ## TypeScript
 
 Every package extends `tsconfig.base.json` with `composite: true`.
 Run `pnpm run typecheck` from the root to check all packages.
 
-## Vercel Deployment
+## Deployment
 
 Build command: `pnpm --filter @workspace/vcf-card run build`
-Output directory: `dist/` (project root, configured in `vercel.json`)
-Root directory in Vercel dashboard: leave blank (project root)
+API server is built via esbuild in `artifacts/api-server/build.mjs`

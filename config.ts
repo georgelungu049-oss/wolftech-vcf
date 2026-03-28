@@ -1,32 +1,38 @@
 // =============================================================
-//  WOLFTECH VCF — YOUR SETTINGS (edit this file to set up)
+//  WOLFTECH VCF — CONFIGURATION
 // =============================================================
 //
-//  This is the ONLY file you need to change before deploying.
+//  All sensitive values are read from environment variables /
+//  Replit Secrets. Set them in the Secrets tab in Replit.
 //
-//  DATABASE_URL
-//    A PostgreSQL connection string. Get one for free at:
-//      → https://neon.tech        (recommended, works great with Vercel)
-//      → https://supabase.com
-//      → https://railway.app
-//    It will look like:
-//      postgresql://username:password@host/database?sslmode=require
-//
-//  ADMIN_PIN
-//    The password to log in to your admin panel at /admin
-//    Change this to anything you want (numbers or letters)
-//
-//  CONTACT_TARGET
-//    How many contacts need to be collected before the VCF
-//    download button unlocks on the public page.
-//    You can also change this anytime from the /admin panel.
+//  DATABASE_URL   — PostgreSQL connection string (auto-provided
+//                   by Replit's built-in DB, or set your own)
+//  ADMIN_PIN      — PIN to access the /admin panel
+//  CONTACT_TARGET — How many contacts unlock the VCF download
+//                   (can also be changed from /admin)
 //
 // =============================================================
+
+const DATABASE_URL = process.env["DATABASE_URL"];
+const ADMIN_PIN = process.env["ADMIN_PIN"];
+const CONTACT_TARGET = process.env["CONTACT_TARGET"];
+
+if (!DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL environment variable is required. Set it in the Replit Secrets tab.",
+  );
+}
+
+if (!ADMIN_PIN) {
+  throw new Error(
+    "ADMIN_PIN environment variable is required. Set it in the Replit Secrets tab.",
+  );
+}
 
 export const config = {
-  DATABASE_URL: "postgresql://neondb_owner:npg_6SfwRzX1AodP@ep-restless-glade-amdhwblh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+  DATABASE_URL,
 
-  ADMIN_PIN: "wolf906",
+  ADMIN_PIN,
 
-  CONTACT_TARGET: 50,
+  CONTACT_TARGET: CONTACT_TARGET ? Number(CONTACT_TARGET) : 50,
 };

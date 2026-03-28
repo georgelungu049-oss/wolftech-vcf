@@ -47,3 +47,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Build output
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Attached screenshot assets (Replit agent only)
+attached_assets/

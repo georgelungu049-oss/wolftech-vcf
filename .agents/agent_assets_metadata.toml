@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "BwsXBUoHl-IOAiswK-gf0"
+uri = "file://README.md"
+type = "text"
+title = "README.md — WOLF TECH VCF"

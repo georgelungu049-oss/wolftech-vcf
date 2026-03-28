@@ -60,8 +60,8 @@ function flagEmoji(code: string) {
 const socialLinks = [
   { href: "https://wa.me/254713046497",                                icon: "📱", label: "WhatsApp",  value: "+254 713 046 497" },
   { href: "https://www.youtube.com/@Silentwolf906",                    icon: "▶",  label: "YouTube",   value: "@Silentwolf906" },
-  { href: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y",    icon: "📡", label: "WA Channel", value: "wolfXnode Updates" },
-  { href: "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",         icon: "👥", label: "WA Group",   value: "wolfXnode Community" },
+  { href: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y",    icon: "📡", label: "WA Channel", value: "WOLF TECH Updates" },
+  { href: "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",         icon: "👥", label: "WA Group",   value: "WOLF TECH Community" },
 ];
 
 const statBadges = [
@@ -268,7 +268,7 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
                 fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
               }}
             >
-              📡 Follow wolfXnode Channel
+              📡 Follow WOLF TECH Channel
             </a>
             <a
               href="https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu"
@@ -280,7 +280,7 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
                 fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
               }}
             >
-              👥 Join wolfXnode Group
+              👥 Join WOLF TECH Group
             </a>
             <button
               type="button" onClick={onClose}

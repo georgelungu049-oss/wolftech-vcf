@@ -552,7 +552,7 @@ export default function DigitalCard() {
 
       {/* Tagline */}
       <p style={{ marginTop: 14, textAlign: "center", fontFamily: mono, fontSize: 9, color: C.muted, letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        I am just an explorer &nbsp;·&nbsp; wolfXnode
+        I am just an explorer &nbsp;·&nbsp; WOLF TECH
       </p>
     </div>
   );

@@ -23,8 +23,9 @@ export default async function handler(req: any, res: any) {
     const stats = await getStats();
     return res.status(201).json({ id: inserted.id, message: "Contact saved successfully", stats });
   } catch (err: any) {
-    const msg = err?.message ?? "";
-    if (msg.includes("unique") || msg.includes("duplicate")) {
+    const msg = (err?.message ?? "").toLowerCase();
+    const code = err?.code ?? err?.cause?.code ?? "";
+    if (code === "23505" || msg.includes("unique") || msg.includes("duplicate")) {
       return res.status(409).json({ error: "This phone number has already been submitted" });
     }
     console.error(err);

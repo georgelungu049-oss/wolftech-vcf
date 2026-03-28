@@ -22,6 +22,12 @@ async function fetchStats(): Promise<Stats> {
   return res.json();
 }
 
+class ContactError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+  }
+}
+
 async function submitContact(data: { fullName: string; phone: string }): Promise<{ id: number; message: string; stats: Stats }> {
   const res = await fetch("/api/contacts", {
     method: "POST",
@@ -29,7 +35,7 @@ async function submitContact(data: { fullName: string; phone: string }): Promise
     body: JSON.stringify(data),
   });
   const json = await res.json();
-  if (!res.ok) throw new Error(json.error || "Failed to submit");
+  if (!res.ok) throw new ContactError(json.error || "Failed to submit", res.status);
   return json;
 }
 
@@ -331,13 +337,14 @@ function ProgressBar({ stats }: { stats: Stats }) {
 
 /* ─── Contact form ─── */
 function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
-  const [name, setName]         = useState("");
-  const [phone, setPhone]       = useState<string | undefined>(undefined);
-  const [country, setCountry]   = useState<Country>("KE");
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [name, setName]           = useState("");
+  const [phone, setPhone]         = useState<string | undefined>(undefined);
+  const [country, setCountry]     = useState<Country>("KE");
+  const [loading, setLoading]     = useState(false);
+  const [error, setError]         = useState("");
+  const [isDuplicate, setIsDuplicate] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [open, setOpen]         = useState(false);
+  const [open, setOpen]           = useState(false);
 
   const inputBase: React.CSSProperties = {
     width: "100%", fontFamily: mono, fontSize: 12,
@@ -353,13 +360,17 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
     if (!name.trim()) { setError("Name is required"); return; }
     if (!phone)       { setError("Phone number is required"); return; }
     if (!isValidPhoneNumber(phone)) { setError("Please enter a valid international phone number"); return; }
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setIsDuplicate(false);
     try {
       const r = await submitContact({ fullName: name.trim(), phone });
       setShowSuccess(true);
       onSubmitted(r.stats);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      if (err instanceof ContactError && err.status === 409) {
+        setIsDuplicate(true);
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -407,7 +418,7 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
               onCountryChange={(c) => c && setCountry(c)}
               placeholder="Phone / WhatsApp number"
               value={phone}
-              onChange={setPhone}
+              onChange={(v) => { setPhone(v); setIsDuplicate(false); setError(""); }}
               countrySelectComponent={({ value, onChange }) => (
                 <CountrySelectModal
                   value={value as Country | undefined}
@@ -420,13 +431,19 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
                 ✓ Valid — saves as: <span style={{ color: C.green }}>{phone}</span>
               </div>
             )}
+            {isDuplicate && (
+              <div style={{ fontFamily: mono, fontSize: 10, padding: "10px 12px", borderRadius: 8, textAlign: "center", lineHeight: 1.6, background: "hsl(45 80% 40% / 0.08)", border: "1px solid hsl(45 80% 40% / 0.25)", color: "hsl(45 80% 55%)" }}>
+                📱 This number is already in the system.<br />
+                <span style={{ fontSize: 9, color: "hsl(45 80% 45%)" }}>Your contact is already saved — no need to submit again.</span>
+              </div>
+            )}
             {error && (
               <div style={{ fontFamily: mono, fontSize: 10, padding: "6px 10px", borderRadius: 6, color: "hsl(0 55% 55%)", background: "hsl(0 55% 50% / 0.08)", border: "1px solid hsl(0 55% 50% / 0.22)" }}>
                 ⚠ {error}
               </div>
             )}
             <div style={{ display: "flex", gap: 8 }}>
-              <button type="button" onClick={() => { setOpen(false); setError(""); setPhone(undefined); }}
+              <button type="button" onClick={() => { setOpen(false); setError(""); setIsDuplicate(false); setPhone(undefined); }}
                 className="btn-secondary-glow"
                 style={{ flexShrink: 0, padding: "9px 13px", borderRadius: 8, cursor: "pointer", fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Cancel

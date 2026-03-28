@@ -44,8 +44,9 @@ router.post("/", async (req, res) => {
       stats,
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (message.includes("unique") || message.includes("duplicate")) {
+    const message = (err instanceof Error ? err.message : String(err)).toLowerCase();
+    const code = (err as any)?.code ?? (err as any)?.cause?.code ?? "";
+    if (code === "23505" || message.includes("unique") || message.includes("duplicate")) {
       res.status(409).json({ error: "This phone number has already been submitted" });
       return;
     }

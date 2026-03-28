@@ -477,8 +477,8 @@ export default function DigitalCard() {
             W<div className="avatar-ring" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="glow-text" style={{ fontFamily: orb, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: 900, color: C.green, letterSpacing: "0.04em", lineHeight: 1.2 }}>Silentwolf</div>
-            <div style={{ fontSize: 9, color: C.dim, marginTop: 4, letterSpacing: "0.09em", textTransform: "uppercase" }}>Bot Dev &amp; System Explorer</div>
+            <div className="glow-text" style={{ fontFamily: orb, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: 900, color: C.green, letterSpacing: "0.04em", lineHeight: 1.2 }}>WOLF TECH</div>
+            <div style={{ fontSize: 9, color: C.dim, marginTop: 4, letterSpacing: "0.09em", textTransform: "uppercase" }}>I Explore Systems</div>
             <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}><span style={{ color: C.dim }}>@</span>Silentwolf906</div>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: C.green, border: "1px solid hsl(120 60% 40% / 0.22)", background: "hsl(120 60% 40% / 0.05)", padding: "3px 8px", borderRadius: 99, marginTop: 6 }}>
               <div className="status-dot" /> Available

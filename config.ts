@@ -12,7 +12,7 @@
 // =============================================================
 
 export const config = {
-  DATABASE_URL: process.env["DATABASE_URL"] ?? "",
+  DATABASE_URL: process.env["DATABASE_URL"] ?? "postgresql://neondb_owner:npg_6SfwRzX1AodP@ep-restless-glade-amdhwblh-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
 
   ADMIN_PIN: process.env["ADMIN_PIN"] ?? "wolf906",
 

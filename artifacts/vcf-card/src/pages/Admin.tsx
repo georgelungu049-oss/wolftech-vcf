@@ -36,6 +36,9 @@ export default function Admin() {
   const [target, setTarget]       = useState("");
   const [targetMsg, setTargetMsg] = useState("");
   const [deleting, setDeleting]   = useState<number | null>(null);
+  const [clearing, setClearing]   = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearMsg, setClearMsg]   = useState("");
 
   const load = useCallback(async (p: string) => {
     const [s, c] = await Promise.all([
@@ -83,6 +86,19 @@ export default function Admin() {
   }
 
   function downloadVcf() { window.open(`/api/admin/download?pin=${encodeURIComponent(pin)}`, "_blank"); }
+
+  async function clearAll() {
+    setClearing(true); setClearMsg("");
+    const res = await api("/contacts", { method: "DELETE" }, pin);
+    if (res.ok) {
+      setClearMsg("✓ Database cleared — new count starts now");
+      setConfirmClear(false);
+      await load(pin);
+    } else {
+      setClearMsg("⚠ Failed to clear. Try again.");
+    }
+    setClearing(false);
+  }
 
   useEffect(() => { if (authed) load(pin); }, [authed, load, pin]);
 
@@ -235,9 +251,11 @@ export default function Admin() {
           )}
         </div>
 
-        {/* Download */}
+        {/* Download + Clear */}
         <div style={{ background: g.bg, border: `1px solid ${g.border}`, borderRadius: 10, padding: "14px" }}>
-          <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: g.green, marginBottom: 10 }}>Export</div>
+          <div style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: g.green, marginBottom: 10 }}>Export & Reset</div>
+
+          {/* Download */}
           <button
             onClick={downloadVcf}
             className="btn-primary-glow"
@@ -246,7 +264,52 @@ export default function Admin() {
               fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
             }}
           >⬇ Download All Contacts (.vcf)</button>
-          <div style={{ fontSize: 9, color: g.muted, marginTop: 6 }}>Admin download bypasses the target requirement.</div>
+          <div style={{ fontSize: 9, color: g.muted, marginTop: 6, marginBottom: 14 }}>Admin download bypasses the target requirement.</div>
+
+          {/* Clear all */}
+          {!confirmClear ? (
+            <button
+              onClick={() => { setClearMsg(""); setConfirmClear(true); }}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 8, cursor: "pointer",
+                fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                background: g.redBg, border: `1px solid ${g.redBdr}`, color: g.red,
+              }}
+            >⟳ Clear Database &amp; Restart Count</button>
+          ) : (
+            <div style={{ background: "hsl(0 60% 10% / 0.5)", border: `1px solid ${g.redBdr}`, borderRadius: 8, padding: "12px" }}>
+              <div style={{ fontSize: 10, color: g.red, fontWeight: 700, marginBottom: 6 }}>⚠ This will delete ALL contacts permanently.</div>
+              <div style={{ fontSize: 9, color: g.muted, marginBottom: 10 }}>Make sure you have downloaded the VCF file first. This cannot be undone.</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={clearAll}
+                  disabled={clearing}
+                  style={{
+                    flex: 1, padding: "9px", borderRadius: 7, border: "none", cursor: "pointer",
+                    fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                    background: g.red, color: "#000", opacity: clearing ? 0.6 : 1,
+                  }}
+                >{clearing ? "Clearing…" : "Yes, Clear All"}</button>
+                <button
+                  onClick={() => { setConfirmClear(false); setClearMsg(""); }}
+                  style={{
+                    flex: 1, padding: "9px", borderRadius: 7, cursor: "pointer",
+                    fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                    background: "none", border: `1px solid ${g.border}`, color: g.muted,
+                  }}
+                >Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {clearMsg && (
+            <div style={{
+              marginTop: 8, fontSize: 10, padding: "6px 10px", borderRadius: 6,
+              color: clearMsg.startsWith("✓") ? g.green : g.red,
+              background: clearMsg.startsWith("✓") ? "hsl(120 60% 40% / 0.08)" : g.redBg,
+              border: `1px solid ${clearMsg.startsWith("✓") ? "hsl(120 60% 40% / 0.2)" : g.redBdr}`,
+            }}>{clearMsg}</div>
+          )}
         </div>
 
         {/* Contacts table */}

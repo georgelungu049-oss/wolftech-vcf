@@ -73,10 +73,25 @@ router.put("/target", async (req, res) => {
   }
 });
 
-/* DELETE /api/admin/contacts?id=X */
+/* DELETE /api/admin/contacts        — clear ALL contacts
+   DELETE /api/admin/contacts?id=X   — delete one contact */
 router.delete("/contacts", async (req, res) => {
   if (!checkAuth(req, res)) return;
-  const id = Number(req.query["id"]);
+
+  const rawId = req.query["id"];
+
+  if (!rawId) {
+    try {
+      await db.delete(contactsTable);
+      res.json({ success: true, cleared: true });
+    } catch (err) {
+      req.log.error({ err }, "Admin clear all contacts error");
+      res.status(500).json({ error: "Internal server error" });
+    }
+    return;
+  }
+
+  const id = Number(rawId);
   if (!Number.isInteger(id) || id < 1) {
     res.status(422).json({ error: "Provide a valid ?id= query param" });
     return;

@@ -23,12 +23,25 @@ export default async function handler(req: any, res: any) {
   }
 
   if (req.method === "DELETE") {
-    const id = Number(req.query?.id);
-    if (!Number.isInteger(id) || id < 1) {
+    const id = req.query?.id;
+
+    // No id = clear ALL contacts
+    if (!id) {
+      try {
+        await db.delete(contactsTable);
+        return res.json({ success: true, cleared: true });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+    }
+
+    const numId = Number(id);
+    if (!Number.isInteger(numId) || numId < 1) {
       return res.status(422).json({ error: "Provide a valid ?id= query param" });
     }
     try {
-      await db.delete(contactsTable).where(eq(contactsTable.id, id));
+      await db.delete(contactsTable).where(eq(contactsTable.id, numId));
       return res.json({ success: true });
     } catch (err) {
       console.error(err);

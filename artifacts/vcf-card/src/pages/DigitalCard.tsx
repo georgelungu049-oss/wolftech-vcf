@@ -473,8 +473,9 @@ export default function DigitalCard() {
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
-          <div className="glow-box" style={{ position: "relative", flexShrink: 0, width: 58, height: 58, borderRadius: "50%", background: "hsl(120 20% 7%)", border: `2px solid ${C.border2}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: orb, fontSize: 19, fontWeight: 900, color: C.green }}>
-            W<div className="avatar-ring" />
+          <div className="glow-box" style={{ position: "relative", flexShrink: 0, width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.border2}`, overflow: "hidden" }}>
+            <img src="/og-image.png" alt="WOLF TECH" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            <div className="avatar-ring" />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div className="glow-text" style={{ fontFamily: orb, fontSize: "clamp(15px, 4vw, 20px)", fontWeight: 900, color: C.green, letterSpacing: "0.04em", lineHeight: 1.2 }}>WOLF TECH</div>

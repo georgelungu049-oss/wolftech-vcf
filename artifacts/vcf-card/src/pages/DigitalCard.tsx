@@ -16,10 +16,35 @@ interface Stats {
   targetReached: boolean;
 }
 
+interface SiteSettings {
+  whatsapp: string;
+  youtube: string;
+  wa_channel: string;
+  wa_group: string;
+}
+
+const DEFAULT_SETTINGS: SiteSettings = {
+  whatsapp:   "https://wa.me/254713046497",
+  youtube:    "https://www.youtube.com/@Silentwolf906",
+  wa_channel: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y",
+  wa_group:   "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",
+};
+
 async function fetchStats(): Promise<Stats> {
   const res = await fetch("/api/contacts/stats");
   if (!res.ok) throw new Error("Failed to fetch stats");
   return res.json();
+}
+
+async function fetchSettings(): Promise<SiteSettings> {
+  try {
+    const res = await fetch("/api/settings");
+    if (!res.ok) return DEFAULT_SETTINGS;
+    const { settings } = await res.json();
+    return { ...DEFAULT_SETTINGS, ...settings };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
 }
 
 class ContactError extends Error {
@@ -63,12 +88,14 @@ function flagEmoji(code: string) {
   ).join("");
 }
 
-const socialLinks = [
-  { href: "https://wa.me/254713046497",                                icon: "📱", label: "WhatsApp",  value: "+254 713 046 497" },
-  { href: "https://www.youtube.com/@Silentwolf906",                    icon: "▶",  label: "YouTube",   value: "@Silentwolf906" },
-  { href: "https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y",    icon: "📡", label: "WA Channel", value: "WOLF TECH Updates" },
-  { href: "https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu",         icon: "👥", label: "WA Group",   value: "WOLF TECH Community" },
-];
+function buildSocialLinks(s: SiteSettings) {
+  return [
+    { href: s.whatsapp,   icon: "📱", label: "WhatsApp",   value: "+254 713 046 497" },
+    { href: s.youtube,    icon: "▶",  label: "YouTube",    value: "@Silentwolf906" },
+    { href: s.wa_channel, icon: "📡", label: "WA Channel", value: "WOLF TECH Updates" },
+    { href: s.wa_group,   icon: "👥", label: "WA Group",   value: "WOLF TECH Community" },
+  ];
+}
 
 const statBadges = [
   { value: "24/7", label: "Uptime" },
@@ -221,7 +248,7 @@ function CountrySelectModal({ value, onChange }: CountrySelectProps) {
 }
 
 /* ─── Success popup modal ─── */
-function SuccessModal({ onClose }: { onClose: () => void }) {
+function SuccessModal({ onClose, settings }: { onClose: () => void; settings: SiteSettings }) {
   return (
     <div
       onClick={onClose}
@@ -241,11 +268,9 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
           boxShadow: "0 0 60px hsl(120 60% 40% / 0.2), 0 24px 48px rgba(0,0,0,0.7)",
         }}
       >
-        {/* Top glow strip */}
         <div style={{ height: 2, background: "linear-gradient(90deg, transparent, hsl(120 60% 44%), transparent)" }} />
 
         <div style={{ padding: "28px 22px 22px", textAlign: "center" }}>
-          {/* Checkmark */}
           <div style={{
             width: 56, height: 56, borderRadius: "50%", margin: "0 auto 16px",
             background: "hsl(120 60% 40% / 0.1)", border: "2px solid hsl(120 60% 40% / 0.35)",
@@ -262,42 +287,23 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
             <span style={{ color: C.green, fontWeight: 700 }}>WhatsApp Channel &amp; Group</span> once the target is reached.
           </div>
 
-          {/* CTA buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
             <a
-              href="https://whatsapp.com/channel/0029Vb6dn9nEQIaqEMNclK3Y"
+              href={settings.wa_channel}
               target="_blank" rel="noopener noreferrer"
               className="btn-primary-glow"
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                padding: "11px 16px", borderRadius: 9, textDecoration: "none",
-                fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-              }}
-            >
-              📡 Follow WOLF TECH Channel
-            </a>
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 16px", borderRadius: 9, textDecoration: "none", fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}
+            >📡 Follow WOLF TECH Channel</a>
             <a
-              href="https://chat.whatsapp.com/HjFc3pud3IA0R0WGr1V2Xu"
+              href={settings.wa_group}
               target="_blank" rel="noopener noreferrer"
               className="btn-secondary-glow"
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                padding: "11px 16px", borderRadius: 9, textDecoration: "none",
-                fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
-              }}
-            >
-              👥 Join WOLF TECH Group
-            </a>
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 16px", borderRadius: 9, textDecoration: "none", fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}
+            >👥 Join WOLF TECH Group</a>
             <button
               type="button" onClick={onClose}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                fontFamily: mono, fontSize: 9, color: C.muted, marginTop: 2,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-              }}
-            >
-              Close
-            </button>
+              style={{ background: "none", border: "none", cursor: "pointer", fontFamily: mono, fontSize: 9, color: C.muted, marginTop: 2, letterSpacing: "0.08em", textTransform: "uppercase" }}
+            >Close</button>
           </div>
         </div>
       </div>
@@ -336,7 +342,7 @@ function ProgressBar({ stats }: { stats: Stats }) {
 }
 
 /* ─── Contact form ─── */
-function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
+function ContactForm({ onSubmitted, settings }: { onSubmitted: (s: Stats) => void; settings: SiteSettings }) {
   const [name, setName]           = useState("");
   const [phone, setPhone]         = useState<string | undefined>(undefined);
   const [country, setCountry]     = useState<Country>("KE");
@@ -379,7 +385,7 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
   return (
     <>
       {showSuccess && (
-        <SuccessModal onClose={() => { setShowSuccess(false); setOpen(false); }} />
+        <SuccessModal onClose={() => { setShowSuccess(false); setOpen(false); }} settings={settings} />
       )}
 
       {!open ? (
@@ -463,8 +469,15 @@ function ContactForm({ onSubmitted }: { onSubmitted: (s: Stats) => void }) {
 
 /* ─── Main page ─── */
 export default function DigitalCard() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  useEffect(() => { fetchStats().then(setStats).catch(() => {}); }, []);
+  const [stats, setStats]           = useState<Stats | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    fetchStats().then(setStats).catch(() => {});
+    fetchSettings().then(setSiteSettings).catch(() => {});
+  }, []);
+
+  const socialLinks = buildSocialLinks(siteSettings);
 
   return (
     <div style={{ position: "relative", zIndex: 1, minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 12px 48px", fontFamily: mono }}>
@@ -505,7 +518,7 @@ export default function DigitalCard() {
         </div>
 
         {stats && <ProgressBar stats={stats} />}
-        <ContactForm onSubmitted={setStats} />
+        <ContactForm onSubmitted={setStats} settings={siteSettings} />
 
         {/* Social links — 4 links, no platform */}
         <div style={{ padding: "12px 14px", borderBottom: `1px solid ${C.border}` }}>
@@ -552,7 +565,7 @@ export default function DigitalCard() {
               🔒 VCF unlocks at <span style={{ color: C.green, marginLeft: 4, fontWeight: 700 }}>{stats?.target ?? 50} contacts</span>
             </div>
           )}
-          <a href="https://wa.me/254713046497" target="_blank" rel="noopener noreferrer"
+          <a href={siteSettings.whatsapp} target="_blank" rel="noopener noreferrer"
             className="btn-secondary-glow"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "9px 6px", borderRadius: 9, fontFamily: mono, fontSize: 10, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", textDecoration: "none" }}>
             💬 Message
